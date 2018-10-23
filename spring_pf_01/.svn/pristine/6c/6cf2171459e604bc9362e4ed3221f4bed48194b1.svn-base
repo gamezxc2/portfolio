@@ -1,0 +1,23 @@
+package com.yhs.pf.job;
+
+import org.apache.log4j.Logger;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.yhs.pf.service.AttachService;
+
+public class AttachJob extends QuartzJobBean {
+	@Autowired AttachService aService;
+	private Logger logger = Logger.getLogger(AttachJob.class);
+	
+	@Override
+	protected void executeInternal(JobExecutionContext arg0) throws JobExecutionException {
+		logger.debug("AttachJob logger");
+		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+		aService.updateUnlinkedInfo();
+	}
+		
+}

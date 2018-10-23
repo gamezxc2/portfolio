@@ -1,0 +1,6 @@
+/applicationContext-beans.xml
+/applicationContext-datasource.xml
+/com/
+/log4j.properties
+/mybatis-configuration.xml
+/sql/

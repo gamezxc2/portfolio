@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//dtd mapper 3.0//en" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.yhs.pf.dao.MessageDao">
+
+<!-- 총 메시지 개수 구하기 -->
+<select id="getTotalCount" parameterType="Map" resultType="int">
+ SELECT count(mess_idx) FROM message WHERE 1=1 
+ 	<if test="searchType==null or searchType==1">
+ 		AND ( send_id = #{memberId} OR receive_id = #{memberId} )
+ 	</if>
+ 	<if test="searchType!=null and searchType==2">
+ 		AND receive_id = #{memberId} 
+ 	</if>
+ 	<if test="searchType!=null and searchType==3">
+ 		AND send_id = #{memberId} 
+ 	</if>
+</select> 
+
+<!-- 모든 메시지 보기 -->
+<!-- searchType에 따라 해당 옵션에 따른 메시지만을 표시할수 있다  -->
+<select id="selectList" parameterType="Map" resultType="Map">
+ SELECT mess_idx, send_id , receive_id,
+ 		send_nick , receive_nick, content, 
+ 		DATE_FORMAT(send_date,'%Y-%m-%d %H:%i:%s') AS send_date 
+   FROM message WHERE 1=1  
+ 	<if test="searchType==null or searchType==1">
+ 		AND ( send_id = #{memberId} OR receive_id = #{memberId} )
+ 	</if>
+ 	<if test="searchType!=null and searchType==2">
+ 		AND receive_id = #{memberId} 
+ 	</if>
+ 	<if test="searchType!=null and searchType==3">
+ 		AND send_id = #{memberId} 
+ 	</if>
+ 	ORDER BY ${sidx} ${sord} LIMIT ${startIdx}, ${pageArticleSize}
+</select>
+
+
+<!-- 메시지 작성 -->
+<insert id="writeMessage" parameterType="Map">
+INSERT INTO message (`send_id`,`receive_id`, `send_nick`, `receive_nick`, `content`, `send_date`) 
+VALUES (#{sendId}, #{receiveId}, #{sendNick}, #{receiveNick}, #{contents} , NOW())
+</insert>
+
+
+<!-- 메시지 삭제 -->
+<delete id="deleteMessage" parameterType="Map">
+DELETE FROM message WHERE mess_idx = ${mess_idx}
+</delete>
+
+</mapper>

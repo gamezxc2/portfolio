@@ -1,0 +1,106 @@
+package com.yhs.pf.controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.yhs.pf.service.MessageService;
+
+@Controller
+public class MessageController {
+	Logger logger = Logger.getLogger(MessageController.class);
+	
+	@Autowired private MessageService meService;
+	
+	@Value("#{config['project.context.path']}")
+	private String contextRoot;
+	
+	@RequestMapping("/message/goMessagePage.do")		
+	public ModelAndView list() {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName("message/list");
+		return mv;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/message/getList.do")
+	public HashMap<String,Object> getList(@RequestParam HashMap<String,String> params, HttpSession session) {
+		params.put("memberId", String.valueOf(session.getAttribute("memberId")));
+		logger.debug("/message/getList.do params = "+params);
+		//한 페이지에 보여줄 게시글 수
+		int rows = params.containsKey("rows")?Integer.parseInt(params.get("rows")) : 5;
+		//현재 페이지
+		int currentPage = params.containsKey("page")? Integer.parseInt(params.get("page")) : 1;
+		//전체 메시지 수 구하기
+		int totalMessage = meService.getTotalCount(params);
+		logger.debug("total cnt params = " + totalMessage);
+		//총 페이지 수
+		int totalPage = (int)(Math.ceil((double) totalMessage / rows));
+		logger.debug("page cnt params = "+totalPage);
+		//시작 인덱스  : 오라클에서는 끝 인덱스도 필요.
+		int startIdx = (currentPage-1) * rows; //현재 페이지에서 보여줄 첫 메시지 번호
+		params.put("startIdx", String.valueOf(startIdx));
+		params.put("pageArticleSize", String.valueOf(rows));
+		if(!params.containsKey("sidx")) params.put("sidx", "mess_idx");
+		if(!params.containsKey("sord")) params.put("sord", "desc");
+		ArrayList<HashMap<String,Object>> list = meService.selectList(params);
+		logger.debug("/message/getListData.do params = "+ list);
+		HashMap<String,Object> result = new HashMap<String,Object>();
+		result.put("page", currentPage); // 현재 페이지
+		result.put("total", totalPage); // 총 페이지 수
+		result.put("rows", list); // 데이터 목록
+		result.put("records", totalMessage); //총 메시지 수
+		return result;
+	}
+	
+	@RequestMapping("/message/goWritePage.do")		
+	public ModelAndView goWritePage(@RequestParam HashMap<String,String> params, HttpSession session ) {
+		ModelAndView mv = new ModelAndView();
+		if(session.getAttribute("memberId") != null) {
+			mv.setViewName("message/write");
+			mv.addObject("receiveId",params.get("receiveId"));
+		} else { // 로그인이 안된 상태
+			mv.setViewName("common/error"); // 세션 만료로 인한 로그인에러
+			mv.addObject("msg","로그인 해주시기 바랍니다."); // 에러 메시지 전달
+			mv.addObject("nextLocation", "/index.do"); //다음 위치 지정.
+		}
+		return mv;
+	}
+	
+	@RequestMapping("/message/write.do")
+	public ModelAndView write(@RequestParam HashMap<String,String> params, HttpSession session) {
+		logger.debug("/message/write.do params = " + params);
+		ModelAndView mv = new ModelAndView();
+		if(session.getAttribute("memberId") != null) {
+			mv.setViewName("message/list");
+			mv.addObject("msg", (meService.sendMessage(params) == 1) ? "메시지 송신 성공" : "메시지 송신 실패" );
+		} else { // 로그인이 안된 상태
+			mv.setViewName("common/error"); // 세션 만료로 인한 로그인에러
+			mv.addObject("msg","로그인 세션이 만료되었습니다."); // 에러 메시지 전달
+			mv.addObject("nextLocation", "/index.do"); //다음 위치 지정.
+		}
+		return mv;
+	}
+	
+	@ResponseBody
+	@RequestMapping("/message/delete.do")
+	public HashMap<String,String> delete(@RequestParam HashMap<String, String> params){
+		logger.debug("/message/delete.do params = "+ params);
+		HashMap<String, String> map = new HashMap<String,String>();
+		int cnt = meService.deleteMessage(params);
+		map.put("msg", (cnt == 1)? "삭제 성공" : "삭제 실패");
+		map.put("result", String.valueOf(cnt));
+		return map;
+	}
+	
+}

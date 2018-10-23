@@ -1,0 +1,67 @@
+package com.yhs.pf.dao;
+
+import java.util.HashMap;
+import java.util.List;
+
+
+public interface NoticeDao {
+	/**
+	 * 작성한 글을 DB에 등록
+	 * @param params 게시판 번호, 사용자ID, 닉네임, 제목, 내용, 첨부파일여부
+	 * @return 작성이 완료 되었을 경우 기대값 1
+	 */
+	public int write(HashMap<String, Object> params);
+	
+	/**
+	 * 모든 게시글 불러오기
+	 * @param params 게시판 번호, 검색 옵션, 검색어
+	 * @return 해당하는 조건의 모든 게시글을 가지는 List
+	 */
+	public List<HashMap<String,Object>> selectList(HashMap<String, Object> params);
+	
+	/**
+	 * 총 게시글 수 가져오기
+	 * @param params 게시판 번호, 검색 옵션, 검색어
+	 * @return 총 게시글 수(int)
+	 */
+	public int getTotalCount(HashMap<String, Object> params);
+	
+	/**
+	 * 조회 수 올리기
+	 * @param typeSeq 게시판 번호
+	 * @param boardSeq 게시글 번호
+	 * @return 조회수 올리기 성공시 기대값 1
+	 */
+	public int updateHit(int typeSeq, int boardSeq);
+	
+	/**
+	 * 조회할 글 불러오기
+	 * @param typeSeq 게시판 번호
+	 * @param boardSeq 게시글 번호
+	 * @return 해당 조건에 맞는 게시글 정보
+	 */
+	public HashMap<String, Object> getBoard(int typeSeq, int boardSeq);
+	
+	/**
+	 * 해당 조건에 맞는 게시글 삭제하기
+	 * @param typeSeq 게시판 번호
+	 * @param boardSeq 게시글 번호
+	 * @return 해당 글 삭제에 성공하였을 경우 기대값 1
+	 */
+	public int deleteBoard(int typeSeq, int boardSeq);
+	
+	/**
+	 * 게시글 내용 수정하기
+	 * @param params 게시판 번호, 게시글 번호, 제목, 내용, 첨부파일 여부
+	 * @return 해당 글 내용 수정에 성공하였을 경우 기대값 1
+	 */
+	public int updateBoard(HashMap<String, Object> params);
+	
+	/**
+	 * 첨부파일 소지 여부 수정 
+	 * @param typeSeq 게시판 번호
+	 * @param boardSeq 게시글 번호
+	 * @return HasFile의 업데이트 성공하였을 경우 기대값 1
+	 */
+	public int updateHasFile(int typeSeq, int boardSeq);
+}

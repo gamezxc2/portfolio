@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//dtd mapper 3.0//en" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.yhs.pf.dao.NoticeDao">
+
+<!-- 게시글 작성  -->
+<insert id="write" parameterType="Map" useGeneratedKeys="true" keyProperty="boardSeq">
+INSERT INTO board (`type_seq`,`member_idx`,`member_id`, `member_nick`, `title`, `content`, `has_file`, `create_date` ) 
+VALUES (#{typeSeq},#{memberIdx},#{memberId},#{memberNick},#{title},#{contents}, #{hasFile} ,now())
+ 	<!-- AI가 안되는 경우에 따로 지정 -->
+ 	<!-- <selectKey keyProperty="boardSeq" resultType="int" order="AFTER">
+ 	select last_insert_id()
+ 	</selectKey> -->
+</insert>
+
+<!-- 조건에 따른 게시글 조회 -->
+<select id="selectList" parameterType="Map" resultType="Map">
+SELECT * FROM board WHERE type_seq = #{typeSeq} 
+ 	<if test="searchType!=null and searchType==1">
+ 		AND (title like concat('%',#{searchText},'%') OR content like concat('%',#{searchText},'%') )
+ 	</if>
+ 	<if test="searchType!=null and searchType==2">
+ 		AND title like concat('%',#{searchText},'%') 
+ 	</if>
+ 	<if test="searchType!=null and searchType==3">
+ 		AND content like concat('%',#{searchText},'%') 
+ 	</if>
+ 	ORDER BY board_seq DESC LIMIT ${startIdx}, ${pageArticleSize}
+</select>
+ 
+<!-- 조건에 따른 게시글 갯수 조회  -->
+<select id="getTotalCount" parameterType="Map" resultType="int">
+SELECT COUNT(board_seq) FROM board WHERE type_seq = #{typeSeq}
+ 	<if test="searchType!=null and searchType==1">
+ 		AND (title like concat('%',#{searchText},'%') OR content like concat('%',#{searchText},'%') )
+ 	</if>
+ 	<if test="searchType!=null and searchType==2">
+ 		AND title like concat('%',#{searchText},'%') 
+ 	</if>
+ 	<if test="searchType!=null and searchType==3">
+ 		AND content like concat('%',#{searchText},'%') 
+ 	</if>
+</select> 
+
+<!-- 조회수 증가 -->
+<update id="updateHit" parameterType="int">
+UPDATE board SET hits=hits+1 WHERE `type_seq`=#{0} AND `board_seq`=#{1}
+</update>
+
+<!-- 조건에 맞는 게시글 조회 -->
+<select id="getBoard" parameterType="int" resultType="Map">
+SELECT * FROM board WHERE type_seq = #{0} AND board_seq = #{1}
+</select>
+
+<!-- 조건에 맞는 게시글 삭제 -->
+<delete id="deleteBoard" parameterType="int">
+DELETE FROM board WHERE `type_seq`= #{0} AND `board_seq`= #{1}
+</delete>
+
+<!-- 입력받은 내용으로 게시글 수정 -->
+<update id="updateBoard" parameterType="Map">
+UPDATE board SET title = #{title}, content = #{contents}, has_file= #{hasFile}, update_date = now() 
+WHERE `type_seq`= #{typeSeq} AND `board_seq`= #{boardSeq}
+</update>
+
+<!-- 파일이 없을 경우 첨부파일 존재여부 값를 변경 -->
+<update id="updateHasFile" parameterType="int">
+UPDATE board SET has_file = 0 WHERE `type_seq`= #{0} AND `board_seq`= #{1}
+</update>
+
+</mapper>

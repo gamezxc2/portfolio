@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//dtd mapper 3.0//en" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.yhs.pf.dao.AttachDao">
+
+<insert id="insertAttach" parameterType="Map">
+INSERT INTO board_attach (`board_seq`, `board_type`, `filename`, `fake_filename`, `file_size`, `file_type`, `save_loc`, `create_date`)
+values(#{boardSeq}, #{typeSeq}, #{filename}, #{fakeFilename}, #{fileSize}, #{fileType}, #{saveLoc}, now())
+</insert>
+
+<select id="getAttachFile" parameterType="int" resultType="Map">
+SELECT * FROM board_attach WHERE file_idx = #{fileIdx}
+</select>
+ 
+<delete id="deleteAttach" parameterType="int">
+DELETE FROM board_attach WHERE file_idx = #{0}
+</delete>
+ 
+<select id="getAttachFiles" parameterType="int" resultType="Map">
+SELECT * from board_attach WHERE `board_type`= #{0} AND `board_seq`= #{1}
+</select>
+
+<delete id="deleteAttachSeq" parameterType="int">
+DELETE FROM board_attach WHERE `board_type`= #{0} AND `board_seq`= #{1}
+</delete>
+ 
+<select id="getAllAttachFile" resultType="Map">
+SELECT * FROM board_attach 
+</select> 
+
+<update id="updateLinked" parameterType="int">
+UPDATE board_attach SET linked = 0 WHERE file_idx = #{0}
+</update>
+
+<update id="updateLinkedAll" parameterType="list">
+UPDATE board_attach SET linked = 0 WHERE file_idx IN
+	<!-- 파라미터 타입이 컬렉션이면 컬렉션타입을, 맵이면 Key -->
+	<foreach collection="list" item="fileIdx" open="(" close=")" separator=",">
+		#{fileIdx}
+	</foreach>
+</update>
+ 
+</mapper>

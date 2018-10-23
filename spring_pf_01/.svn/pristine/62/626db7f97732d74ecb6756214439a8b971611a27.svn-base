@@ -1,0 +1,28 @@
+package com.yhs.pf.service.impl;
+
+import java.util.HashMap;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.yhs.pf.dao.AttachDao;
+import com.yhs.pf.service.AttachService;
+
+@Service
+public class AttachServiceImpl implements AttachService{
+
+	@Autowired private AttachDao aDao;
+	
+	@Override
+	public HashMap<String, Object> getAttachFile(int fileIdx) {		
+		HashMap<String, Object> result = aDao.getAttachFile(fileIdx);		
+		return result;
+	}
+	
+	@Override
+	public List<HashMap<String, Object>> getAttachFiles(int typeSeq, int boardSeq) {
+		return aDao.getAttachFiles(typeSeq, boardSeq);
+	}
+		
+}
