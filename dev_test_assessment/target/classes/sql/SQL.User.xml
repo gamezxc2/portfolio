@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//dtd mapper 3.0//en" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.asmt.pf.dao.UserDao">
+<insert id="join" parameterType="Map">
+INSERT INTO user (`user_id`,`user_pw`,`user_name`,`user_nick`,`email`,`is_admin`,`create_date`)
+VALUES(#{userId},SHA2(MD5(#{userPw}),512),#{userName},#{userNick},#{email},#{isAdmin},NOW())
+</insert>
+
+<select id="search" parameterType="String" resultType="int">
+SELECT user_idx FROM user WHERE user_id = #{0} 
+</select>
+
+<delete id="delete" parameterType="int">
+DELETE FROM user WHERE user_idx = #{0}
+</delete>
+
+</mapper>
